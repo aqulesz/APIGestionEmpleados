@@ -47,7 +47,6 @@ namespace CrudIntentoDos.Services
             {
                 Nombre = sucursalInsertDto.Nombre,
                 Direccion = sucursalInsertDto.Direccion,
-
             };
 
             await _context.AddAsync(sucursal);

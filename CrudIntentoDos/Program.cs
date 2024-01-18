@@ -1,6 +1,8 @@
+using APIGestionEmpleados.Validators;
 using CrudIntentoDos.DTOs;
 using CrudIntentoDos.Models;
 using CrudIntentoDos.Services;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +22,8 @@ builder.Services.AddDbContext<GestionEmpleadoContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("GestionEmpleadosCS"));
 });
 
+//Validators
+builder.Services.AddScoped<IValidator<SucursalInsertDto>, SucursalInsertValidator>();
 
 var app = builder.Build();
 

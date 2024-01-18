@@ -1,6 +1,8 @@
-﻿using CrudIntentoDos.DTOs;
+﻿using APIGestionEmpleados.Validators;
+using CrudIntentoDos.DTOs;
 using CrudIntentoDos.Models;
 using CrudIntentoDos.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,10 +14,13 @@ namespace CrudIntentoDos.Controllers
     public class SucursalController : ControllerBase
     {
         private ICrudService<SucursalDto, SucursalInsertDto, SucursalUpdateDto> _sucursalService;
+        private IValidator<SucursalInsertDto> _sucursalInsertValidator;
 
-        public SucursalController([FromKeyedServices("SucursalService")] ICrudService<SucursalDto, SucursalInsertDto, SucursalUpdateDto> sucursalService)
+        public SucursalController([FromKeyedServices("SucursalService")] ICrudService<SucursalDto, SucursalInsertDto, SucursalUpdateDto> sucursalService,
+            IValidator<SucursalInsertDto> sucursalInsertValidator)
         {
             _sucursalService = sucursalService;
+            _sucursalInsertValidator = sucursalInsertValidator;
         }
 
         [HttpGet]
@@ -33,9 +38,16 @@ namespace CrudIntentoDos.Controllers
         [HttpPost]
         public async Task<ActionResult<SucursalDto>> AddSucursal(SucursalInsertDto sucursalInsertDto)
         {
-            var sucursalDto = _sucursalService.Add(sucursalInsertDto);
+            var validationResult = await _sucursalInsertValidator.ValidateAsync(sucursalInsertDto);
 
-            return CreatedAtAction(nameof(GetSucursalById), new { id = sucursalDto.Id}, sucursalDto);
+           if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+
+            var sucursalDto = await _sucursalService.Add(sucursalInsertDto);
+
+            return CreatedAtAction(nameof(GetSucursalById), new { id = sucursalDto.SucursalId}, sucursalDto);
         }
 
         [HttpPut("{id}")]
